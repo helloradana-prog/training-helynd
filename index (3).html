@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Helynd Feltrin · Hellora Consultoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --preto: #1a1a1a;
+    --preto-puro: #000000;
+    --cinza-claro: #f0f0f0;
+    --branco: #FFFFFF;
+    --tinta: #1a1a1a;
+    --tinta-suave: #666666;
+    --linha: #e5e5e5;
+    --sombra: 0 10px 28px rgba(26,26,26,0.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Jost', sans-serif;
+    background: var(--branco);
+    color: var(--tinta);
+    min-height:100vh;
+    padding-bottom: 90px;
+  }
+  .hero{
+    position:relative;
+    padding: 30px 20px 46px;
+    background: linear-gradient(135deg, #e8e8e8 0%, #fafafa 100%);
+    overflow:hidden;
+    color: var(--tinta);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:220px; height:220px;
+    background: radial-gradient(circle, rgba(26,26,26,0.15) 0%, rgba(26,26,26,0) 70%);
+    border-radius:50%;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    left:-40px; bottom:-80px;
+    width:180px; height:180px;
+    background: radial-gradient(circle, rgba(26,26,26,0.1) 0%, rgba(26,26,26,0) 70%);
+    border-radius:50%;
+  }
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:2;}
+  .eyebrow{
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    opacity:.85; font-weight:500; color: var(--preto);
+  }
+  .nome{
+    font-family:'Fraunces', serif; font-style:italic; font-weight:500;
+    font-size:32px; margin: 4px 0 2px; line-height:1.05;
+  }
+  .sub{font-size:13px; opacity:.9;}
+  .pill{
+    background: rgba(26,26,26,0.1);
+    border:1px solid rgba(26,26,26,0.2);
+    color: var(--preto);
+    border-radius:100px; padding:6px 12px; font-size:12px;
+    backdrop-filter: blur(4px);
+    white-space:nowrap;
+  }
+  .tabs{
+    display:flex; gap:6px; padding: 0 14px; margin-top:-26px; position:relative; z-index:3;
+  }
+  .tab-btn{
+    flex:1; text-align:center; padding:12px 4px; border-radius:16px;
+    background:#fff; border:1px solid var(--linha);
+    font-family:'Jost'; font-size:12.5px; font-weight:500; color: var(--tinta-suave);
+    box-shadow: var(--sombra);
+    cursor:pointer; transition: all .15s ease;
+  }
+  .tab-btn.active{
+    background: linear-gradient(135deg, #1a1a1a, #333333);
+    color: var(--branco); border-color: transparent;
+  }
+  .content{ padding: 22px 16px 10px; max-width:560px; margin:0 auto;}
+  .view{display:none; animation: fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .section-title{
+    font-family:'Fraunces'; font-style:italic; font-weight:500;
+    font-size:20px; margin: 18px 2px 10px; color: var(--preto);
+  }
+  .section-title:first-child{margin-top:0;}
+
+  .treino-switch{
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px;
+  }
+  .treino-chip{
+    flex:0 0 auto; padding:9px 16px; border-radius:100px; font-size:13px; font-weight:500;
+    background: var(--cinza-claro); color: var(--preto); border:1px solid var(--linha);
+    cursor:pointer; white-space:nowrap;
+  }
+  .treino-chip.active{ background: var(--preto-puro); color:#fff; border-color:var(--preto-puro);}
+  .treino-sub{font-size:12.5px; color:var(--tinta-suave); margin: 2px 2px 12px;}
+
+  .card{
+    background:#fff; border:1px solid var(--linha); border-radius:18px;
+    padding:14px 14px 12px; margin-bottom:12px; box-shadow: 0 4px 16px rgba(26,26,26,0.05);
+  }
+  .card-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .ex-nome{font-size:15px; font-weight:500;}
+  .ex-foco{font-size:11.5px; color:var(--preto); background:var(--cinza-claro); border-radius:8px; padding:2px 8px; display:inline-block; margin-top:4px;}
+  .check{
+    width:26px; height:26px; border-radius:8px; border:2px solid var(--linha);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;
+    transition: all .15s;
+  }
+  .check.done{ background: var(--preto); border-color: var(--preto); }
+  .check.done::after{content:"✓"; color:#fff; font-size:15px; font-weight:600;}
+  .badges{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .badge{font-size:11px; padding:4px 9px; border-radius:8px; background:#f5f5f5; color:var(--tinta-suave); font-weight:500;}
+  .badge.rpe{background:var(--cinza-claro); color:var(--preto);}
+  .badge.alerta{background:#fdecec; color:#b42318;}
+  .load-row{display:flex; align-items:center; gap:8px; margin-top:10px;}
+  .load-row label{font-size:11.5px; color:var(--tinta-suave);}
+  .load-row input{
+    flex:1; border:1px solid var(--linha); border-radius:10px; padding:8px 10px;
+    font-family:'Jost'; font-size:13px; color:var(--tinta);
+  }
+  .load-row input:focus{outline:none; border-color:var(--preto);}
+  .ex-obs{font-size:11.5px; color:var(--tinta-suave); margin-top:8px; line-height:1.45;}
+
+  .save-bar{
+    position:sticky; bottom:0; padding: 12px 0 4px; background: linear-gradient(to top, #fff 60%, rgba(255,255,255,0));
+  }
+  .save-btn{
+    width:100%; border:none; padding:15px; border-radius:16px; font-family:'Jost'; font-size:15px; font-weight:500;
+    background: linear-gradient(135deg, #1a1a1a, #333333); color:#fff; cursor:pointer;
+    box-shadow: var(--sombra);
+  }
+  .save-btn:active{transform: scale(.98);}
+  .toast{
+    position:fixed; left:50%; bottom:100px; transform:translateX(-50%) translateY(20px);
+    background:var(--tinta); color:#fff; padding:10px 18px; border-radius:100px; font-size:13px;
+    opacity:0; transition: all .25s; pointer-events:none; z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .guia-item{margin-bottom:14px; padding:12px; background:#f9f9f9; border-radius:12px;}
+  .guia-desc{font-size:13px; color:var(--tinta-suave); line-height:1.6; margin-top:6px;}
+  .guia-parte{margin:8px 0 6px 0; font-weight:500; color:var(--preto); font-size:12px;}
+
+  .rpe-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .rpe-table td{padding:8px 6px; border-bottom:1px solid var(--linha); vertical-align:top;}
+  .rpe-num{
+    width:30px; height:30px; border-radius:8px; background:var(--preto); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px;
+  }
+  .rpe-note{font-size:11.5px; color:var(--tinta-suave); margin-top:10px; line-height:1.5;}
+
+  .week-switch{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:14px;}
+  .week-chip{flex:0 0 auto; padding:7px 13px; border-radius:100px; font-size:12.5px; background:var(--cinza-claro); color:var(--preto); cursor:pointer;}
+  .week-chip.active{background:var(--preto); color:#fff;}
+  .eval-cat{margin-bottom:14px;}
+  .eval-cat-name{font-size:13.5px; font-weight:500; margin-bottom:6px;}
+  .eval-cat-hint{font-size:11px; color:var(--tinta-suave); font-weight:400;}
+  .eval-scale{display:flex; gap:6px;}
+  .eval-dot{
+    flex:1; text-align:center; padding:9px 0; border-radius:10px; border:1px solid var(--linha);
+    font-size:13px; font-weight:500; color:var(--tinta-suave); cursor:pointer;
+  }
+  .eval-dot.active{background:var(--preto); color:#fff; border-color:var(--preto);}
+  textarea.obs{
+    width:100%; border:1px solid var(--linha); border-radius:12px; padding:10px; font-family:'Jost';
+    font-size:13px; min-height:70px; resize:vertical;
+  }
+  textarea.obs:focus{outline:none; border-color:var(--preto);}
+
+  .perfil-row{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--linha); font-size:13.5px;}
+  .perfil-row:last-child{border-bottom:none;}
+  .perfil-label{color:var(--tinta-suave);}
+  .perfil-value{font-weight:500; text-align:right;}
+  .peso-edit{display:flex; align-items:center; gap:8px;}
+  .peso-edit input{width:70px; border:1px solid var(--linha); border-radius:10px; padding:6px 8px; font-family:'Jost'; font-size:13.5px; text-align:right;}
+  .alerta-card{background:#fdf5f5; border-color:#f3d4d4;}
+
+  /* ── Helynd · Treino em casa: aviso da semana e cronômetro do circuito ── */
+  .aviso{
+    background:#f9f9f9; border:1px solid var(--linha); border-left:4px solid var(--preto);
+    border-radius:14px; padding:12px 14px; margin-bottom:12px;
+  }
+  .aviso-topo{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .aviso-titulo{font-family:'Fraunces'; font-style:italic; font-weight:500; font-size:17px;}
+  .aviso-tag{font-size:11.5px; font-weight:500; background:var(--preto); color:#fff; border-radius:100px; padding:3px 10px; white-space:nowrap;}
+  .aviso-texto{font-size:12.5px; line-height:1.45; margin-top:6px;}
+
+  .timer{background:var(--preto); color:#fff; border-radius:18px; padding:16px; margin-bottom:12px;}
+  .timer-fase{font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.75;}
+  .timer-nome{font-family:'Fraunces'; font-style:italic; font-size:22px; margin-top:2px; line-height:1.15;}
+  .timer-num{font-size:56px; font-weight:300; line-height:1; margin:10px 0 4px; font-variant-numeric: tabular-nums;}
+  .timer-info{font-size:12.5px; opacity:.8;}
+  .timer-prox{font-size:12px; opacity:.6; margin-top:4px;}
+  .timer-barra{height:4px; background:rgba(255,255,255,.18); border-radius:4px; margin-top:12px; overflow:hidden;}
+  .timer-barra div{height:100%; background:#fff; width:0;}
+  .timer-btns{display:flex; gap:8px; margin-top:14px;}
+  .timer-btns button{
+    flex:1; border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; padding:11px; border-radius:12px;
+    font-family:'Jost'; font-size:14px; font-weight:500; cursor:pointer;
+  }
+  .timer-btns button.pri{background:#fff; color:var(--preto); border-color:#fff; flex:2;}
+  .timer.pausa .timer-num{opacity:.75;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-top">
+    <div>
+      <div class="eyebrow">Hellora Consultoria</div>
+      <div class="nome">Helynd Feltrin</div>
+      <div class="sub">Treino em casa · 3x por semana + Pilates</div>
+    </div>
+    <div class="pill" id="semanaPill">Semana 1</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab-btn active" data-view="treino">Treino</div>
+  <div class="tab-btn" data-view="guia">Guia</div>
+  <div class="tab-btn" data-view="avaliacao">Avaliação</div>
+  <div class="tab-btn" data-view="perfil">Perfil</div>
+</div>
+
+<div class="content">
+
+  <!-- TREINO -->
+  <div class="view active" id="view-treino">
+    <div class="week-switch" id="weekSwitchTreino"></div>
+    <div class="aviso" id="avisoSemana"></div>
+    <div class="treino-switch" id="treinoSwitch"></div>
+    <div class="treino-sub" id="treinoSub"></div>
+    <div id="exList"></div>
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarTreino">Salvar treino</button>
+    </div>
+  </div>
+
+  <!-- GUIA -->
+  <div class="view" id="view-guia">
+    <div class="section-title">Escala de Intensidade — RPE</div>
+    <table class="rpe-table">
+      <tr><td><div class="rpe-num">10</div></td><td>Falha total — não conseguiria completar mais nenhuma repetição.</td></tr>
+      <tr><td><div class="rpe-num">9</div></td><td>Sobrariam no máximo 1 repetição — esforço muito alto.</td></tr>
+      <tr><td><div class="rpe-num">8</div></td><td>Sobrariam cerca de 2 repetições — esforço alto, controlado.</td></tr>
+      <tr><td><div class="rpe-num">7</div></td><td>Sobrariam cerca de 3 repetições — esforço moderado-alto. No circuito: respiração forte, fala só palavras soltas.</td></tr>
+      <tr><td><div class="rpe-num">6</div></td><td>Sobrariam 4 ou mais repetições — esforço moderado.</td></tr>
+      <tr><td><div class="rpe-num">5</div></td><td>Esforço leve — respiração tranquila, foco em aprender o movimento.</td></tr>
+    </table>
+    <div class="rpe-note">
+      <b>Fase 1 (semanas 1–6):</b> semanas 1–3 em RPE 5, aprendendo os movimentos. Semanas 4–6 em RPE 6, com descida em 3 segundos.<br><br>
+      <b>Fase 2 (semanas 7–13):</b> circuito em RPE 6–7. No treino de força, descida em 3 segundos, pausa de 1–2 segundos embaixo e elástico um nível mais forte.<br><br>
+      <b>Como progredir em casa:</b> o peso da sua filha é sempre o mesmo, então a evolução vem de descer mais devagar, fazer pausa embaixo, fazer mais repetições ou trocar para um elástico mais forte.<br><br>
+      <b>Joelhos:</b> nunca passe de 90° de flexão e nada de saltos.<br><br>
+      <b>Refluxo:</b> treine pelo menos 2 horas depois de comer e solte o ar no esforço, sem prender a respiração.
+    </div>
+
+    <div class="section-title">Guia de Execução</div>
+    <div id="guiaList"></div>
+  </div>
+
+  <!-- AVALIAÇÃO -->
+  <div class="view" id="view-avaliacao">
+    <div class="section-title">Avaliação semanal</div>
+    <div class="week-switch" id="weekSwitch"></div>
+    <div id="evalCats"></div>
+    <div class="eval-cat">
+      <div class="eval-cat-name">Observações da semana</div>
+      <textarea class="obs" id="evalObs" placeholder="Como foi a semana? Sentiu o ciático? Teve azia no treino? O joelho incomodou? Foi ao Pilates?"></textarea>
+    </div>
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarAvaliacao">Salvar avaliação</button>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="view" id="view-perfil">
+    <div class="section-title">Perfil</div>
+    <div class="card">
+      <div class="perfil-row"><span class="perfil-label">Nome completo</span><span class="perfil-value">Helynd Feltrin</span></div>
+      <div class="perfil-row"><span class="perfil-label">Idade</span><span class="perfil-value">32 anos</span></div>
+      <div class="perfil-row"><span class="perfil-label">Altura</span><span class="perfil-value">157 cm</span></div>
+      <div class="perfil-row">
+        <span class="perfil-label">Peso atual</span>
+        <span class="peso-edit"><input type="number" id="pesoInput" step="0.1"> kg</span>
+      </div>
+      <div class="perfil-row"><span class="perfil-label">Meta</span><span class="perfil-value">60 kg</span></div>
+    </div>
+
+    <div class="section-title">Medidas Iniciais</div>
+    <div class="card">
+      <div class="perfil-row"><span class="perfil-label">Peso</span><span class="perfil-value">85 kg</span></div>
+      <div class="perfil-row"><span class="perfil-label">Cintura</span><span class="perfil-value">90 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Quadril</span><span class="perfil-value">117 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Coxa</span><span class="perfil-value">69 cm</span></div>
+      <div class="perfil-row"><span class="perfil-label">Bíceps</span><span class="perfil-value">38,5 cm</span></div>
+    </div>
+
+    <div class="section-title">Objetivo</div>
+    <div class="card">
+      <div style="font-size:13.5px; line-height:1.5;"><b>Emagrecimento — de 85 kg para 60 kg</b>, com saúde e proteção dos joelhos. Você já perdeu medida na barriga: as calças que não serviam voltaram a servir.<br><br>
+      <b>Fase 1 (semanas 1–6):</b> aprender os movimentos com o peso da sua filha, elásticos, banco e degrau.<br>
+      <b>Fase 2 (semanas 7–13):</b> circuito funcional sem impacto para acelerar o metabolismo e o condicionamento, mais um treino de força por semana.</div>
+    </div>
+
+    <div class="section-title">Cuidados de Saúde</div>
+    <div class="card alerta-card">
+      <div style="font-size:13.5px; line-height:1.55;">
+        ⚠️ <b>Joelhos (condropatia patelar):</b> no máximo 90° de flexão, sem saltos e sem travar o joelho. Por isso, nada de pular corda por enquanto.<br><br>
+        <b>Ciático:</b> faça o alongamento do final de todo treino. Se a dor descer pela perna ou vier com formigamento, me avise e procure um fisioterapeuta ou médico.<br><br>
+        <b>Refluxo:</b> treine pelo menos 2 horas depois de comer, evite ficar de cabeça para baixo e solte o ar no esforço. Azia todo dia vale uma consulta médica.
+      </div>
+    </div>
+
+    <div class="section-title">Protocolo Personalizado</div>
+    <div class="card">
+      <div style="font-size:13.5px; line-height:1.5;">
+        <b>Dias:</b> 3 treinos por semana nos dias que você preferir, sem fazer os 3 seguidos. Pilates toda quarta.<br><br>
+        <b>Fortalecimento de Core:</b> Respiração Diafragmática + Dead Bug + Glute Squeeze no início de TODOS os treinos (2 séries de cada).<br><br>
+        <b>Sua filha como carga:</b> sempre em movimentos lentos e com ela junto ao corpo. Nunca no circuito rápido.<br><br>
+        <b>Degrau e step:</b> subida no degrau da escada com a mão no corrimão. O step (até 20 cm) é só para tocar o pé, sempre sobre tapete e encostado na parede.<br><br>
+        <b>Hidratação:</b> meta de 2,5 L por dia. Use uma garrafa com marcações de horário, beba 500 ml antes do treino e beba água entre as refeições, não durante (ajuda no refluxo).
+      </div>
+    </div>
+
+    <div class="section-title">Equipamentos</div>
+    <div class="card">
+      <div class="perfil-row"><span class="perfil-label">Você já tem</span><span class="perfil-value">Step, elásticos, banco, escada com corrimão</span></div>
+      <div class="perfil-row"><span class="perfil-label">Comprar</span><span class="perfil-value">Kit de tubos com alça (leve, médio, forte) + âncora de porta · kit de mini bands</span></div>
+      <div class="perfil-row"><span class="perfil-label">Corda</span><span class="perfil-value">Não usar por enquanto (impacto)</span></div>
+    </div>
+
+    <div class="section-title">Plano Nutricional</div>
+    <div class="card">
+      <div class="perfil-row"><span class="perfil-label">Café da manhã</span><span class="perfil-value">Whey</span></div>
+      <div class="perfil-row"><span class="perfil-label">Almoço</span><span class="perfil-value">Incluir fruta</span></div>
+      <div class="perfil-row"><span class="perfil-label">Lanche da tarde</span><span class="perfil-value">Castanhas + queijo</span></div>
+      <div class="perfil-row"><span class="perfil-label">Hidratação</span><span class="perfil-value">2,5 L de água por dia</span></div>
+      <div class="perfil-row"><span class="perfil-label">Proteína</span><span class="perfil-value">127 g por dia</span></div>
+      <div class="perfil-row"><span class="perfil-label">Déficit calórico</span><span class="perfil-value">−500 kcal</span></div>
+      <div class="perfil-row"><span class="perfil-label">Bebida</span><span class="perfil-value">Chá de hibisco, cavalinha e dente de leão</span></div>
+      <div class="perfil-row"><span class="perfil-label">Corte</span><span class="perfil-value">Manteiga</span></div>
+    </div>
+
+    <div class="save-bar">
+      <button class="save-btn" id="btnSalvarPerfil">Salvar peso</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Salvo!</div>
+
+<script>
+const CORE_HELLORA = {slug:"core", nome:"Fortalecimento de Core", isCore:true, subItems:[
+  {slug:"respiracao-diafragmatica", nome:"Respiração Diafragmática", series:2, reps:"10"},
+  {slug:"dead-bug", nome:"Dead Bug", series:2, reps:"10 cada lado"},
+  {slug:"glute-squeeze", nome:"Glute Squeeze (deitada)", series:2, reps:"10"}
+]};
+
+const CIATICO = {slug:"alongamento-ciatico", nome:"Alongamento para o Ciático — 5 min", isBloco:true, focoBloco:"Final do treino · sem forçar", subItems:[
+  {slug:"alongamento-piriforme", nome:"Alongamento do piriforme (figura 4)", series:2, reps:"30 seg cada lado"},
+  {slug:"deslizamento-ciatico", nome:"Deslizamento do nervo ciático (sentada)", series:2, reps:"10 cada lado"}
+]};
+
+const ELASTICO = "leve / médio / forte";
+
+const TREINO_A = [
+  CORE_HELLORA,
+  {slug:"sentar-levantar-filha", nome:"Sentar e Levantar do Banco com a Filha", foco:"Quadríceps + glúteo", series:3, reps:"12", descanso:"60 seg", rpe:"5-6", obs:"Filha abraçada junto ao peito. O banco limita a descida em 90°. Movimento lento."},
+  {slug:"ponte-gluteo-banco", nome:"Ponte de Glúteo com Ombros no Banco", foco:"Glúteo", series:3, reps:"12", descanso:"60 seg", rpe:"5-6", obs:"Filha sentada sobre o quadril, segura com as duas mãos. Aperte o glúteo 2 seg no topo."},
+  {slug:"subida-degrau", nome:"Subida no Degrau da Escada", foco:"Quadríceps + glúteo", series:3, reps:"10 cada perna", descanso:"60 seg", rpe:"5-6", obs:"Mão no corrimão. Pé inteiro no degrau, empurrando pelo calcanhar."},
+  {slug:"stiff-tubo", nome:"Stiff com Tubo Elástico", foco:"Posterior de coxa + glúteo", series:3, reps:"12", descanso:"60 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"ostra-mini-band", nome:"Ostra com Mini Band", foco:"Glúteo médio", series:3, reps:"15 cada lado", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Mini band"},
+  {slug:"panturrilha-degrau", nome:"Panturrilha no Degrau", foco:"Panturrilha", series:3, reps:"15", descanso:"45 seg", rpe:"5-6", obs:"Segure no corrimão. Desça devagar."},
+  {slug:"marcha-lugar", nome:"Marcha no Lugar — 10 min", foco:"Cardio leve · sem impacto", series:1, reps:"10 min", descanso:"—", rpe:"4-5", options:"Ritmo em que você ainda consegue conversar."},
+  CIATICO
+];
+
+const TREINO_B = [
+  CORE_HELLORA,
+  {slug:"remada-tubo", nome:"Remada com Tubo na Porta", foco:"Costas", series:3, reps:"12", descanso:"60 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"flexao-inclinada-banco", nome:"Flexão Inclinada no Banco", foco:"Peito + tríceps", series:3, reps:"8-10", descanso:"60 seg", rpe:"5-6", obs:"Banco encostado na parede para não deslizar."},
+  {slug:"abertura-elastico", nome:"Abertura com Elástico", foco:"Ombro posterior · postura", series:3, reps:"15", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"face-pull-tubo", nome:"Face Pull com Tubo", foco:"Ombro posterior · postura", series:3, reps:"15", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"coice-mini-band", nome:"Coice de Glúteo com Mini Band", foco:"Glúteo", series:3, reps:"12 cada perna", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Mini band"},
+  {slug:"pallof-press", nome:"Pallof Press", foco:"Core · anti-rotação", series:3, reps:"10 cada lado", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"rosca-tubo", nome:"Rosca Direta com Tubo", foco:"Bíceps", series:2, reps:"12", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  {slug:"triceps-tubo", nome:"Tríceps com Tubo", foco:"Tríceps", series:2, reps:"12", descanso:"45 seg", rpe:"5-6", load:true, loadLabel:"Elástico"},
+  CIATICO
+];
+
+/* Treino de força da Fase 2: mesmos exercícios, nível mais avançado */
+function versaoForca(lista){
+  return lista.map(ex=>{
+    if (ex.isCore || ex.isBloco || ex.slug === "marcha-lugar") return ex;
+    const novo = Object.assign({}, ex);
+    novo.rpe = "6-7";
+    novo.obs = "Descida em 3 seg + pausa de 1-2 seg embaixo." + (ex.load ? " Elástico um nível mais forte." : "") + (ex.obs ? " " + ex.obs : "");
+    return novo;
+  });
+}
+
+const ESTACOES = [
+  {slug:"sentar-levantar-ritmado", nome:"Sentar e levantar do banco ritmado"},
+  {slug:"toque-step", nome:"Toque no step alternado"},
+  {slug:"remada-tubo", nome:"Remada com tubo"},
+  {slug:"polichinelo-sem-salto", nome:"Polichinelo sem salto"},
+  {slug:"ponte-gluteo-chao", nome:"Ponte de glúteo"},
+  {slug:"socos-elastico", nome:"Socos com elástico"}
+];
+
+const TREINOS = {
+  "A": {label:"Treino A", sub:"Inferiores · ~45 min", fase:1, exercicios: TREINO_A},
+  "B": {label:"Treino B", sub:"Superiores + glúteo · ~45 min", fase:1, exercicios: TREINO_B},
+  "C": {label:"Circuito", sub:"Funcional metabólico sem impacto · ~40 min · 2x na semana", fase:2, exercicios: [
+    CORE_HELLORA,
+    {slug:"circuito", nome:"Circuito Metabólico", isCircuito:true, subItems: ESTACOES.map(e=>({slug:e.slug, nome:e.nome, series:"", reps:"40 seg"}))},
+    CIATICO
+  ]},
+  "FA": {label:"Força A", sub:"Treino A no nível avançado · semanas ímpares", fase:2, exercicios: versaoForca(TREINO_A)},
+  "FB": {label:"Força B", sub:"Treino B no nível avançado · semanas pares", fase:2, exercicios: versaoForca(TREINO_B)}
+};
+
+/* Carga do elástico: o treino de força puxa a última anotação da Fase 1 também */
+const GRUPO_CARGA = {A:["A"], B:["B"], C:["C"], FA:["FA","A"], FB:["FB","B"]};
+
+const GUIA = {
+  "respiracao-diafragmatica": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés no chão. Uma mão no peito e outra na barriga.",
+    mec: "Inspire pelo nariz em 4-5 seg deixando a BARRIGA subir. Solte o ar devagar pela boca em 5 seg, firmando levemente o abdômen.",
+    dica: "O peito quase não se move. A respiração é pela barriga, não pelas costelas."
+  },
+  "dead-bug": {
+    pos: "Deitada, lombar apoiada no chão, braços apontando para o teto, quadril e joelhos a 90°.",
+    mec: "Estenda o braço direito para trás e a perna esquerda à frente ao mesmo tempo, soltando o ar. Volte e troque o lado.",
+    dica: "A lombar NUNCA sai do chão. Se sair, diminua a amplitude das pernas."
+  },
+  "glute-squeeze": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés no chão na largura do quadril.",
+    mec: "Eleve levemente o quadril e aperte o glúteo com força por 2-3 seg. Desça devagar.",
+    dica: "Elevação pequena: o foco é a contração forte do glúteo, não a altura."
+  },
+  "sentar-levantar-filha": {
+    pos: "Em pé de costas para o banco, pés na largura do quadril. Sua filha abraçada junto ao peito.",
+    mec: "Leve o quadril para trás e sente devagar no banco (2-3 seg). Levante empurrando o chão com o pé inteiro.",
+    dica: "O banco é o seu limite de 90°. Joelhos apontando para os pés. Nunca faça rápido com sua filha no colo."
+  },
+  "ponte-gluteo-banco": {
+    pos: "Parte de cima das costas apoiada na lateral do banco, joelhos dobrados, pés no chão. Sua filha sentada sobre o seu quadril, segura com as duas mãos.",
+    mec: "Empurre o chão com os calcanhares e suba o quadril até o tronco ficar reto. Aperte o glúteo 2 seg no topo. Desça controlando.",
+    dica: "Queixo levemente para baixo. Se sentir a lombar, suba um pouco menos e aperte mais o glúteo."
+  },
+  "subida-degrau": {
+    pos: "De frente para a escada, mão no corrimão, um pé inteiro apoiado no primeiro degrau.",
+    mec: "Empurre pelo calcanhar do pé de cima e suba até ficar em pé no degrau. Desça devagar com a mesma perna. Faça todas as repetições e troque.",
+    dica: "Quem sobe é a perna de cima, sem impulso da perna de baixo. Joelho sempre alinhado com o pé."
+  },
+  "stiff-tubo": {
+    pos: "Em pé, pisando no meio do tubo, pés na largura do quadril, joelhos destravados, alças nas mãos.",
+    mec: "Leve o quadril para trás inclinando o tronco com a coluna reta. Desça até sentir alongar atrás da coxa e suba apertando o glúteo.",
+    dica: "Pense em \"fechar a porta com o bumbum\". As costas não arredondam."
+  },
+  "ostra-mini-band": {
+    pos: "Deitada de lado, mini band acima dos joelhos, quadril e joelhos dobrados, pés juntos.",
+    mec: "Abra o joelho de cima mantendo os pés encostados. Pausa de 1 seg e feche devagar.",
+    dica: "O quadril não roda para trás. Glúteo médio forte ajuda o joelho e a região do ciático."
+  },
+  "panturrilha-degrau": {
+    pos: "Ponta dos pés na borda do degrau, calcanhares para fora, mão no corrimão.",
+    mec: "Suba na ponta dos pés, pausa de 1 seg, e desça até alongar a panturrilha.",
+    dica: "Descida lenta (2-3 seg). Sem quicar embaixo."
+  },
+  "marcha-lugar": {
+    pos: "Em pé, postura alta, abdômen firme.",
+    mec: "Eleve os joelhos alternadamente balançando os braços, em ritmo constante, por 10 minutos.",
+    dica: "Ritmo em que ainda dá para conversar. Sem pular."
+  },
+  "alongamento-piriforme": {
+    pos: "Deitada de barriga para cima, tornozelo direito apoiado sobre o joelho esquerdo.",
+    mec: "Puxe a coxa esquerda em direção ao peito até sentir alongar o glúteo direito. Segure 30 seg e troque.",
+    dica: "Respire fundo e relaxe. Alongamento confortável, nunca dor. Ajuda no \"tiro na bunda\"."
+  },
+  "deslizamento-ciatico": {
+    pos: "Sentada na ponta do banco, coluna reta, mãos no assento.",
+    mec: "Estenda o joelho levando a ponta do pé para cima enquanto olha para cima. Volte dobrando o joelho e olhando para baixo.",
+    dica: "Suave e sem forçar. Se formigar ou a dor descer pela perna, pare e me avise."
+  },
+  "remada-tubo": {
+    pos: "Sentada ou em pé de frente para a porta, tubo preso na âncora na altura do peito, braços estendidos.",
+    mec: "Puxe as alças em direção ao corpo levando os cotovelos para trás. Aperte as escápulas e volte devagar.",
+    dica: "Puxe com os cotovelos, não com as mãos. Peito aberto. Ajuda a alinhar os ombros."
+  },
+  "flexao-inclinada-banco": {
+    pos: "Mãos no banco encostado na parede, um pouco mais abertas que os ombros, corpo em linha reta.",
+    mec: "Dobre os cotovelos levando o peito em direção ao banco. Empurre de volta, soltando o ar.",
+    dica: "Abdômen e glúteo firmes para o quadril não cair. Se ficar difícil, use um apoio mais alto (mesa ou parede)."
+  },
+  "abertura-elastico": {
+    pos: "Em pé, tubo nas mãos na altura do peito, braços estendidos à frente.",
+    mec: "Abra os braços para os lados afastando as mãos até o elástico encostar no peito. Volte devagar.",
+    dica: "Ombros para baixo, longe das orelhas. Ótimo para a postura."
+  },
+  "face-pull-tubo": {
+    pos: "Em pé de frente para a porta, âncora na altura dos olhos, alças nas mãos.",
+    mec: "Puxe em direção ao rosto abrindo os cotovelos para os lados, bem altos. Volte controlando.",
+    dica: "Carga leve. Sinta a parte de trás dos ombros trabalhando."
+  },
+  "coice-mini-band": {
+    pos: "Em quatro apoios, mini band acima dos joelhos ou nos pés, coluna neutra.",
+    mec: "Leve uma perna para trás e para cima com o joelho dobrado, apertando o glúteo. Volte sem encostar o joelho no chão.",
+    dica: "A lombar não arqueia. Quem trabalha é o glúteo."
+  },
+  "pallof-press": {
+    pos: "Em pé de lado para a porta, tubo preso na altura do peito, alças juntas no peito.",
+    mec: "Estenda os braços à frente sem deixar o tronco girar na direção do elástico. Segure 2 seg e volte.",
+    dica: "O objetivo é NÃO girar. Glúteo e abdômen firmes."
+  },
+  "rosca-tubo": {
+    pos: "Em pé pisando no tubo, alças nas mãos, palmas para frente, cotovelos junto ao corpo.",
+    mec: "Dobre os cotovelos subindo as mãos até os ombros. Desça em 2-3 seg.",
+    dica: "Sem balançar o tronco. Só o antebraço se move."
+  },
+  "triceps-tubo": {
+    pos: "De frente para a porta, âncora alta, alças nas mãos, cotovelos colados ao corpo e dobrados a 90°.",
+    mec: "Estenda os cotovelos empurrando as mãos para baixo. Volte devagar até 90°.",
+    dica: "Cotovelos parados. Não jogue o corpo sobre o elástico."
+  },
+  "sentar-levantar-ritmado": {
+    pos: "Em pé de costas para o banco, pés na largura do quadril, braços à frente.",
+    mec: "Sente de leve no banco e levante logo em seguida, em ritmo acelerado, durante os 40 seg.",
+    dica: "Sem peso (sua filha não entra no circuito). Rápido, mas com o joelho sempre alinhado ao pé."
+  },
+  "toque-step": {
+    pos: "De frente para o step (até 20 cm), sobre tapete e encostado na parede.",
+    mec: "Toque a ponta de um pé no step e volte, alternando as pernas em ritmo acelerado.",
+    dica: "Só encostar o pé: não suba com o peso do corpo. Os braços acompanham."
+  },
+  "polichinelo-sem-salto": {
+    pos: "Em pé, pés juntos, braços ao lado do corpo.",
+    mec: "Abra uma perna para o lado elevando os braços acima da cabeça. Volte e repita com a outra perna.",
+    dica: "Ritmo rápido, mas sem pular. Protege os joelhos."
+  },
+  "ponte-gluteo-chao": {
+    pos: "Deitada de barriga para cima, joelhos dobrados, pés no chão na largura do quadril.",
+    mec: "Suba o quadril apertando o glúteo e desça sem encostar totalmente, em ritmo constante, durante os 40 seg.",
+    dica: "Empurre o chão com os calcanhares. Respiração solta."
+  },
+  "socos-elastico": {
+    pos: "Em pé, tubo passando atrás das costas, uma alça em cada mão na altura do peito.",
+    mec: "Soque à frente alternando os braços contra a resistência do elástico.",
+    dica: "Abdômen firme e solte o ar a cada soco."
+  }
+};
+
+/* Categorias da avaliação semanal */
+const EVAL_CATS = [
+  {key:"frequência", label:"Frequência (fez os treinos)", hint:"1 = nenhum · 5 = todos"},
+  {key:"humor", label:"Humor", hint:""},
+  {key:"energia", label:"Energia", hint:""},
+  {key:"sono", label:"Sono", hint:""},
+  {key:"agua", label:"Água", hint:"1 = bebi pouco · 5 = bati a meta todo dia"},
+  {key:"ciatico", label:"Dor no ciático", hint:"1 = nenhuma · 5 = muita"},
+  {key:"refluxo", label:"Azia / refluxo", hint:"1 = nenhuma · 5 = muita"}
+];
+
+const TOTAL_SEMANAS = 13;
+
+let state = {
+  peso: 85,
+  _currentTreino: "A",
+  _currentWeek: 1,
+  _evalWeek: 1,
+  evalNotas: {},
+  evalObs: {}
+};
+
+function faseDaSemana(w){ return w <= 6 ? 1 : 2; }
+function voltasDaSemana(w){ return w <= 9 ? 3 : 4; }
+function treinosDaSemana(w){
+  return Object.keys(TREINOS).filter(k=> TREINOS[k].fase === faseDaSemana(w));
+}
+function garantirTreinoValido(){
+  const validos = treinosDaSemana(state._currentWeek);
+  if (validos.indexOf(state._currentTreino) < 0) state._currentTreino = validos[0];
+}
+
+function keyFor(week, treino, slug){ return `w${week}-t${treino}-${slug}`; }
+
+function getLastLoad(treino, slug, week){
+  const grupos = GRUPO_CARGA[treino] || [treino];
+  for (let w = week - 1; w >= 1; w--){
+    for (const t of grupos){
+      const k = keyFor(w, t, slug);
+      if (state[k] && state[k].load) return state[k].load;
+    }
+  }
+  return '';
+}
+
+function saveLocal(){
+  try{ localStorage.setItem('helynd_casa_state', JSON.stringify(state)); }catch(e){}
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem('helynd_casa_state');
+    if (raw) Object.assign(state, JSON.parse(raw));
+  }catch(e){}
+}
+
+let saveTimer = null;
+let saveInFlight = false;
+let savePendingAfterFlight = false;
+
+const firebaseConfig = {
+  databaseURL: "https://helloradana-consultoria-default-rtdb.firebaseio.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ALUNO_ID = "helynd-casa"; /* Treino em casa — o histórico da academia continua no ID "helynd-feltrin" */
+const stateRef = db.ref('/alunos/' + ALUNO_ID + '/state');
+
+function persist(){
+  saveLocal();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSaveToFirebase, 350);
+}
+
+function flushSaveToFirebase(){
+  if (saveInFlight){ savePendingAfterFlight = true; return; }
+  saveInFlight = true;
+  stateRef.set(state).catch(()=>{ console.warn('Firebase offline'); }).finally(()=>{
+    saveInFlight = false;
+    if (savePendingAfterFlight){
+      savePendingAfterFlight = false;
+      flushSaveToFirebase();
+    }
+  });
+}
+
+function loadFromFirebase(cb){
+  stateRef.once('value').then(snap=>{
+    const val = snap.val();
+    if (val) Object.assign(state, val);
+    cb && cb();
+  }).catch(()=>{ cb && cb(); });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ── Aviso da semana: fase, ordem dos treinos e intensidade ── */
+function renderAvisoSemana(){
+  const w = state._currentWeek;
+  const el = document.getElementById('avisoSemana');
+  let titulo, tag, texto;
+  const ordem = (w % 2 === 1) ? "A · B · A" : "B · A · B";
+  if (w <= 3){
+    titulo = w === 1 ? "Começando: aprenda os movimentos" : "Aprendendo os movimentos";
+    tag = "Fase 1 · RPE 5";
+    texto = `Treinos desta semana: <b>${ordem}</b>, em dias não seguidos. Foco em fazer certo, sem pressa. Pilates na quarta.`;
+  } else if (w <= 6){
+    titulo = w === 4 ? "Hora de intensificar" : "Intensificando";
+    tag = "Fase 1 · RPE 6";
+    texto = `Treinos desta semana: <b>${ordem}</b>. Desça em 3 segundos em todos os exercícios. Se um elástico ficou fácil, troque pelo próximo.`;
+  } else {
+    const voltas = voltasDaSemana(w);
+    const forca = (w % 2 === 1) ? "Força A" : "Força B";
+    titulo = w === 7 ? "Começa a Fase 2: circuito!" : (w === 10 ? "Agora são 4 voltas" : (w === 13 ? "Última semana do ciclo" : "Circuito metabólico"));
+    tag = `Fase 2 · ${voltas} voltas`;
+    texto = `Treinos desta semana: <b>Circuito · ${forca} · Circuito</b>. No circuito, use o cronômetro: 40 seg de exercício, 20 seg de pausa e 2 min entre as voltas.`;
+    if (w === 13) texto += " Tire fotos e medidas no fim da semana para a nossa análise.";
+  }
+  el.innerHTML = `
+    <div class="aviso-topo">
+      <div class="aviso-titulo">${titulo}</div>
+      <div class="aviso-tag">${tag}</div>
+    </div>
+    <div class="aviso-texto">${texto}</div>
+  `;
+}
+
+function renderWeekSwitchTreino(){
+  const el = document.getElementById('weekSwitchTreino');
+  el.innerHTML = '';
+  for (let w=1; w<=TOTAL_SEMANAS; w++){
+    const chip = document.createElement('div');
+    chip.className = 'week-chip' + (state._currentWeek === w ? ' active' : '');
+    chip.textContent = 'Sem ' + w;
+    chip.addEventListener('click', ()=>{
+      state._currentWeek = w;
+      garantirTreinoValido();
+      persist();
+      pararTimer(true);
+      renderWeekSwitchTreino();
+      renderAvisoSemana();
+      renderTreinoSwitch();
+      renderExercicios();
+      updateSemanaPill();
+    });
+    el.appendChild(chip);
+  }
+}
+
+function renderTreinoSwitch(){
+  const el = document.getElementById('treinoSwitch');
+  el.innerHTML = '';
+  treinosDaSemana(state._currentWeek).forEach(key=>{
+    const chip = document.createElement('div');
+    chip.className = 'treino-chip' + (state._currentTreino === key ? ' active' : '');
+    chip.textContent = TREINOS[key].label;
+    chip.addEventListener('click', ()=>{
+      state._currentTreino = key;
+      persist();
+      pararTimer(true);
+      renderTreinoSwitch();
+      renderExercicios();
+    });
+    el.appendChild(chip);
+  });
+  document.getElementById('treinoSub').textContent = TREINOS[state._currentTreino].sub;
+}
+
+function subListHtml(ex){
+  let subHtml = '';
+  ex.subItems.forEach(sub=>{
+    subHtml += `<div style="font-size:12.5px; color:var(--tinta-suave); margin: 6px 0; padding: 6px 0; border-bottom: 1px solid var(--linha);">
+      <span style="font-weight:500;">${sub.nome}</span> — ${sub.series ? sub.series + 'x' : ''}${sub.reps}
+    </div>`;
+  });
+  return subHtml;
+}
+
+function renderExercicios(){
+  const treino = TREINOS[state._currentTreino];
+  const list = document.getElementById('exList');
+  list.innerHTML = '';
+
+  const week = state._currentWeek;
+  const treinoKey = state._currentTreino;
+
+  treino.exercicios.forEach(ex=>{
+    const k = keyFor(week, treinoKey, ex.slug);
+    const saved = state[k] || {done:false, load:""};
+    const loadValue = saved.load || (ex.load ? getLastLoad(treinoKey, ex.slug, week) : '');
+    if (!saved.load && loadValue){
+      state[k] = {done: saved.done, load: loadValue};
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    if (ex.isCore || ex.isBloco){
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="ex-nome">${ex.nome}</div>
+            <div class="ex-foco">${ex.isCore ? 'Ativação · RPE 5' : ex.focoBloco}</div>
+          </div>
+          <div class="check ${saved.done ? 'done' : ''}" data-key="${k}"></div>
+        </div>
+        <div style="margin-top:8px;">
+          ${subListHtml(ex)}
+        </div>
+      `;
+    } else if (ex.isCircuito){
+      const voltas = voltasDaSemana(week);
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="ex-nome">${ex.nome}</div>
+            <div class="ex-foco">Sem impacto · RPE 6-7</div>
+          </div>
+          <div class="check ${saved.done ? 'done' : ''}" data-key="${k}"></div>
+        </div>
+        <div class="badges">
+          <div class="badge">${voltas} voltas</div>
+          <div class="badge">40 seg ON · 20 seg OFF</div>
+          <div class="badge">2 min entre voltas</div>
+        </div>
+        <div style="margin-top:8px;">
+          ${subListHtml(ex)}
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="card-head">
+          <div>
+            <div class="ex-nome">${ex.nome}</div>
+            <div class="ex-foco">${ex.foco}</div>
+          </div>
+          <div class="check ${saved.done ? 'done' : ''}" data-key="${k}"></div>
+        </div>
+        <div class="badges">
+          <div class="badge">${ex.series} ${ex.series === 1 ? 'série' : 'séries'}</div>
+          <div class="badge">${ex.reps}${/^[0-9-]+$/.test(ex.reps) ? ' reps' : ''}</div>
+          ${ex.descanso !== '—' ? `<div class="badge">${ex.descanso}</div>` : ''}
+          <div class="badge rpe">RPE ${ex.rpe}</div>
+        </div>
+        ${ex.obs ? `<div class="ex-obs">${ex.obs}</div>` : ''}
+        ${ex.options ? `<div style="font-size:11.5px; color:var(--tinta-suave); margin-top:8px;">💡 ${ex.options}</div>` : ''}
+      `;
+    }
+
+    if (ex.isCircuito){
+      const tb = document.createElement('div');
+      tb.id = 'timerBox';
+      list.appendChild(tb);
+    }
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.check').forEach(chk=>{
+    chk.addEventListener('click', ()=>{
+      const k = chk.dataset.key;
+      const current = state[k] || {done:false, load:""};
+      current.done = !current.done;
+      state[k] = current;
+      chk.classList.toggle('done');
+      persist();
+    });
+  });
+
+  list.querySelectorAll('[data-load]').forEach(input=>{
+    input.addEventListener('input', ()=>{
+      const k = input.dataset.load;
+      const current = state[k] || {done:false, load:""};
+      current.load = input.value;
+      state[k] = current;
+      persist();
+    });
+  });
+
+  renderTimer();
+}
+
+document.getElementById('btnSalvarTreino').addEventListener('click', ()=>{
+  persist();
+  showToast('Treino salvo!');
+});
+
+/* ── Cronômetro do circuito (40 seg / 20 seg / 2 min entre voltas) ── */
+const T_TRABALHO = 40, T_PAUSA = 20, T_DESCANSO = 120;
+
+function montarEtapas(voltas){
+  const etapas = [];
+  for (let v = 1; v <= voltas; v++){
+    ESTACOES.forEach((e, i)=>{
+      etapas.push({tipo:"trabalho", nome:e.nome, volta:v, est:i+1, dur:T_TRABALHO});
+      const ultimaDaVolta = i === ESTACOES.length - 1;
+      if (!ultimaDaVolta) etapas.push({tipo:"pausa", nome:"Pausa", volta:v, est:i+1, dur:T_PAUSA, prox:ESTACOES[i+1].nome});
+      else if (v < voltas) etapas.push({tipo:"descanso", nome:"Descanso entre voltas", volta:v, est:i+1, dur:T_DESCANSO, prox:ESTACOES[0].nome});
+    });
+  }
+  return etapas;
+}
+
+let timer = {etapas:[], idx:0, restante:0, rodando:false, iniciado:false, fim:false, intervalo:null, alvo:0};
+let audioCtx = null, wakeLock = null;
+
+function bip(freq, dur){
+  try{
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = freq; o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+
+async function pedirTelaLigada(){
+  try{ if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){}
+}
+function soltarTelaLigada(){
+  try{ if (wakeLock){ wakeLock.release(); wakeLock = null; } }catch(e){}
+}
+
+function resetTimer(){
+  timer.etapas = montarEtapas(voltasDaSemana(state._currentWeek));
+  timer.idx = 0;
+  timer.restante = timer.etapas[0].dur;
+  timer.rodando = false; timer.iniciado = false; timer.fim = false;
+}
+
+function pararTimer(resetar){
+  clearInterval(timer.intervalo); timer.intervalo = null;
+  timer.rodando = false;
+  soltarTelaLigada();
+  if (resetar) timer.etapas = [];
+}
+
+function tick(){
+  const agora = Date.now();
+  timer.restante = Math.max(0, Math.ceil((timer.alvo - agora) / 1000));
+  if (timer.restante <= 3 && timer.restante > 0 && timer._ultimoBip !== timer.restante){
+    timer._ultimoBip = timer.restante; bip(660, 0.12);
+  }
+  if (timer.restante <= 0){
+    timer.idx++;
+    if (timer.idx >= timer.etapas.length){
+      pararTimer(false);
+      timer.fim = true; timer.restante = 0;
+      bip(990, 0.6);
+      renderTimer();
+      return;
+    }
+    const et = timer.etapas[timer.idx];
+    bip(et.tipo === "trabalho" ? 990 : 440, 0.35);
+    timer.alvo = Date.now() + et.dur * 1000;
+    timer.restante = et.dur;
+  }
+  renderTimer();
+}
+
+function iniciarOuPausar(){
+  if (timer.fim) resetTimer();
+  if (timer.rodando){
+    pararTimer(false);
+  } else {
+    if (!timer.iniciado){ timer.iniciado = true; bip(990, 0.35); }
+    timer.alvo = Date.now() + timer.restante * 1000;
+    timer.rodando = true;
+    timer.intervalo = setInterval(tick, 250);
+    pedirTelaLigada();
+  }
+  renderTimer();
+}
+
+function fmt(s){ const m = Math.floor(s / 60), r = s % 60; return m ? `${m}:${String(r).padStart(2,'0')}` : String(r); }
+
+function renderTimer(){
+  const box = document.getElementById('timerBox');
+  if (!box) return;
+  if (!timer.etapas.length) resetTimer();
+  const et = timer.etapas[timer.idx];
+  const voltas = voltasDaSemana(state._currentWeek);
+  const total = timer.etapas.reduce((a, e)=> a + e.dur, 0);
+  const feito = timer.etapas.slice(0, timer.idx).reduce((a, e)=> a + e.dur, 0) + (et.dur - timer.restante);
+  let fase, nome, info, prox = '';
+  if (timer.fim){
+    fase = "Pronto"; nome = "Circuito concluído!"; info = `${voltas} voltas completas. Agora o alongamento do ciático.`;
+  } else if (et.tipo === "trabalho"){
+    fase = timer.iniciado ? "Exercício" : "Pronta?"; nome = et.nome;
+    info = `Estação ${et.est} de ${ESTACOES.length} · Volta ${et.volta} de ${voltas}`;
+  } else {
+    fase = et.tipo === "pausa" ? "Pausa" : "Descanso"; nome = et.nome;
+    info = `Volta ${et.volta} de ${voltas}`; prox = `A seguir: ${et.prox}`;
+  }
+  box.innerHTML = `
+    <div class="timer ${et && et.tipo !== 'trabalho' && !timer.fim ? 'pausa' : ''}">
+      <div class="timer-fase">${fase}</div>
+      <div class="timer-nome">${nome}</div>
+      <div class="timer-num">${timer.fim ? '✓' : fmt(timer.restante)}</div>
+      <div class="timer-info">${info}</div>
+      ${prox ? `<div class="timer-prox">${prox}</div>` : ''}
+      <div class="timer-barra"><div style="width:${Math.min(100, Math.round(feito / total * 100))}%"></div></div>
+      <div class="timer-btns">
+        <button id="timerReset">Reiniciar</button>
+        <button class="pri" id="timerPlay">${timer.fim ? 'De novo' : (timer.rodando ? 'Pausar' : (timer.iniciado ? 'Continuar' : 'Iniciar cronômetro'))}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('timerPlay').addEventListener('click', iniciarOuPausar);
+  document.getElementById('timerReset').addEventListener('click', ()=>{ pararTimer(false); resetTimer(); renderTimer(); });
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState === 'visible' && timer.rodando) pedirTelaLigada();
+});
+
+function renderGuia(){
+  const el = document.getElementById('guiaList');
+  el.innerHTML = '';
+  const vistos = {};
+  function addItem(slug, nome, foco){
+    if (vistos[slug] || !GUIA[slug]) return;
+    vistos[slug] = true;
+    const g = GUIA[slug];
+    const div = document.createElement('div');
+    div.className = 'guia-item';
+    div.innerHTML = `
+      <div class="ex-nome" style="font-size:14px;">${nome}</div>
+      ${foco ? `<div class="ex-foco">${foco}</div>` : ''}
+      <div class="guia-parte">📍 Posicionamento</div>
+      <div class="guia-desc">${g.pos}</div>
+      <div class="guia-parte">⚙️ Mecânica do Movimento</div>
+      <div class="guia-desc">${g.mec}</div>
+      <div class="guia-parte">💡 Dica</div>
+      <div class="guia-desc">${g.dica}</div>
+    `;
+    el.appendChild(div);
+  }
+  ["A","B","C"].forEach(key=>{
+    TREINOS[key].exercicios.forEach(ex=>{
+      if (ex.isCore){
+        ex.subItems.forEach(sub=> addItem(sub.slug, sub.nome, 'Fortalecimento de Core'));
+      } else if (ex.isBloco){
+        ex.subItems.forEach(sub=> addItem(sub.slug, sub.nome, 'Alongamento para o ciático'));
+      } else if (ex.isCircuito){
+        ex.subItems.forEach(sub=> addItem(sub.slug, sub.nome, 'Circuito'));
+      } else {
+        addItem(ex.slug, ex.nome, ex.foco);
+      }
+    });
+  });
+}
+
+function renderWeekSwitch(){
+  const el = document.getElementById('weekSwitch');
+  el.innerHTML = '';
+  for (let w=1; w<=TOTAL_SEMANAS; w++){
+    const chip = document.createElement('div');
+    chip.className = 'week-chip' + (state._evalWeek === w ? ' active' : '');
+    chip.textContent = 'Sem ' + w;
+    chip.addEventListener('click', ()=>{
+      state._evalWeek = w;
+      persist();
+      renderWeekSwitch();
+      renderEvalCats();
+    });
+    el.appendChild(chip);
+  }
+}
+
+function renderEvalCats(){
+  const el = document.getElementById('evalCats');
+  el.innerHTML = '';
+  const week = state._evalWeek;
+  const weekKey = week;
+  const notas = (state.evalNotas && state.evalNotas[weekKey]) || {};
+
+  EVAL_CATS.forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'eval-cat';
+    let scaleHtml = '';
+    for (let n=1; n<=5; n++){
+      const active = notas[cat.key] === n ? ' active' : '';
+      scaleHtml += `<div class="eval-dot${active}" data-cat="${cat.key}" data-val="${n}">${n}</div>`;
+    }
+    div.innerHTML = `<div class="eval-cat-name">${cat.label}${cat.hint ? ` <span class="eval-cat-hint">(${cat.hint})</span>` : ''}</div><div class="eval-scale">${scaleHtml}</div>`;
+    el.appendChild(div);
+  });
+
+  el.querySelectorAll('.eval-dot').forEach(dot=>{
+    dot.addEventListener('click', ()=>{
+      const cat = dot.dataset.cat;
+      const val = parseInt(dot.dataset.val);
+      if (!state.evalNotas) state.evalNotas = {};
+      if (!state.evalNotas[weekKey]) state.evalNotas[weekKey] = {};
+      state.evalNotas[weekKey][cat] = val;
+      persist();
+      renderEvalCats();
+    });
+  });
+
+  document.getElementById('evalObs').value = (state.evalObs && state.evalObs[weekKey]) || '';
+}
+
+document.getElementById('evalObs').addEventListener('input', (e)=>{
+  const weekKey = state._evalWeek;
+  if (!state.evalObs) state.evalObs = {};
+  state.evalObs[weekKey] = e.target.value;
+  persist();
+});
+
+document.getElementById('btnSalvarAvaliacao').addEventListener('click', ()=>{
+  persist();
+  showToast('Avaliação salva!');
+});
+
+function renderPerfil(){
+  document.getElementById('pesoInput').value = state.peso != null ? state.peso : 85;
+}
+
+document.getElementById('btnSalvarPerfil').addEventListener('click', ()=>{
+  const val = parseFloat(document.getElementById('pesoInput').value);
+  if (!isNaN(val)) state.peso = val;
+  persist();
+  showToast('Peso atualizado!');
+});
+
+function updateSemanaPill(){
+  document.getElementById('semanaPill').textContent = 'Semana ' + state._currentWeek;
+}
+
+function renderAll(){
+  garantirTreinoValido();
+  renderWeekSwitchTreino();
+  renderAvisoSemana();
+  renderTreinoSwitch();
+  renderExercicios();
+  renderGuia();
+  renderWeekSwitch();
+  renderEvalCats();
+  renderPerfil();
+  updateSemanaPill();
+}
+
+/* Mostra o site mesmo se o Firebase demorar a responder (internet ruim) */
+let jaRenderizou = false;
+loadLocal();
+loadFromFirebase(()=>{ jaRenderizou = true; renderAll(); });
+setTimeout(()=>{ if (!jaRenderizou){ jaRenderizou = true; renderAll(); } }, 2500);
+</script>
+</body>
+</html>
